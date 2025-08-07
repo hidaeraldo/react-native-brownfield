@@ -3,7 +3,13 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 // import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {NavigationContainer} from '@react-navigation/native';
-import {View, Text, TouchableOpacity} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Platform,
+  PermissionsAndroid,
+} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {NotifierWrapper} from 'react-native-notifier';
 import {GestureHandlerRootView, ScrollView} from 'react-native-gesture-handler';
@@ -45,7 +51,7 @@ const AnimatedText = ({text, index}: {text: string; index: number}) => {
 };
 
 // Screen 1: Home Screen
-const HomeScreen = ({isNavigationReady = false}: any) => {
+const HomeScreen = ({_isNavigationReady = false}: any) => {
   const {verifyBiometric} = useBiometricLogic();
   useEffect(() => {
     verifyBiometric(
@@ -59,27 +65,115 @@ const HomeScreen = ({isNavigationReady = false}: any) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    // console.log('HomeScreen');
-    // const timer = setTimeout(() => {
-    if (isNavigationReady) {
-      console.log('navigate to Profile');
-      NavigationService.navigate('Profile');
-    }
-    // }, 10000);
-    // return () => clearTimeout(timer);
-  }, [isNavigationReady]);
+  const requestUserNotificationPermission = async () => {
+    try {
+      // Request Android notification permission first
+      if (Platform.OS === 'android') {
+        try {
+          const granted = await PermissionsAndroid.request(
+            'android.permission.POST_NOTIFICATIONS',
+            {
+              title: 'Notification Permission',
+              message:
+                'App needs access to your notifications so you can get updates',
+              buttonNeutral: 'Ask Me Later',
+              buttonNegative: 'Cancel',
+              buttonPositive: 'OK',
+            },
+          );
+          if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          }
+        } catch (err) {
+          console.log('Notification permission error:', err);
+        }
+      }
 
-  console.log('verifyBiometric');
+      // DeviceTokenHandler.requestMessagingPermissionAndUpdateToken(dispatch);
+    } catch (error) {
+      console.log('General permission error:', error);
+    }
+  };
+
+  const requestLocationPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Permission',
+            message:
+              'This app needs access to your location to provide better services.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.log('Location permission error:', err);
+        return false;
+      }
+    }
+    return true; // iOS handles location permission differently
+  };
+  const manualSetTimeouTesting = () => {
+    setTimeout(() => {
+      console.log('timeout 1 seconds');
+    }, 1000);
+    setTimeout(() => {
+      console.log('timeout 2 seconds');
+    }, 2000);
+    setTimeout(() => {
+      console.log('timeout 3 seconds');
+    }, 3000);
+  };
+
   return (
     <ScrollView>
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <AnimatedText text="Home Screen" index={0} />
         <TouchableOpacity
           onPress={() => NavigationService.navigate('Profile')}
           style={{padding: 10, backgroundColor: '#007AFF', borderRadius: 5}}>
           <Text style={{color: 'white'}}>Go to Profile</Text>
         </TouchableOpacity>
-        <AnimatedText text="Home Screen" index={0} />
+
+        <TouchableOpacity
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            padding: 10,
+            borderRadius: 5,
+            marginTop: 20,
+          }}
+          onPress={() => manualSetTimeouTesting()}>
+          <Text style={{color: '#000', textAlign: 'center'}}>
+            Manual Set Timeout
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            padding: 10,
+            borderRadius: 5,
+            marginTop: 20,
+          }}
+          onPress={() => requestLocationPermission()}>
+          <Text style={{color: '#000', textAlign: 'center'}}>
+            Request Location Permission
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            padding: 10,
+            borderRadius: 5,
+            marginTop: 20,
+          }}
+          onPress={() => requestUserNotificationPermission()}>
+          <Text style={{color: '#000', textAlign: 'center'}}>
+            Request User Notification Permission
+          </Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );

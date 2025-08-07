@@ -78,7 +78,7 @@ afterEvaluate {
             create<MavenPublication>("mavenAar") {
                 groupId = "com.callstack"
                 artifactId = "rnbrownfield"
-                version = "0.0.15-local"
+                version = "0.0.17-local"
                 from(components.getByName("release"))
 
                 pom {
