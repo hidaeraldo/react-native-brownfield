@@ -1,131 +1,185 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, {useEffect, useState} from 'react';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+// import {createStackNavigator} from '@react-navigation/stack';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {NavigationContainer} from '@react-navigation/native';
+import {View, Text, TouchableOpacity} from 'react-native';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {NotifierWrapper} from 'react-native-notifier';
+import {GestureHandlerRootView, ScrollView} from 'react-native-gesture-handler';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withDelay,
+} from 'react-native-reanimated';
+import useBiometricLogic from './useBiometricLogic';
+import NavigationService from './NavigationService';
+// import {KeyboardProvider} from 'react-native-keyboard-controller';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+// Animated Text Component
+const AnimatedText = ({text, index}: {text: string; index: number}) => {
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(20);
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  React.useEffect(() => {
+    opacity.value = withDelay(index * 100, withTiming(1, {duration: 1000}));
+    translateY.value = withDelay(index * 100, withTiming(0, {duration: 1000}));
+  }, [index, opacity, translateY]);
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  /*
-   * To keep the template simple and small we're adding padding to prevent view
-   * from rendering under the System UI.
-   * For bigger apps the reccomendation is to use `react-native-safe-area-context`:
-   * https://github.com/AppAndFlow/react-native-safe-area-context
-   *
-   * You can read more about it here:
-   * https://github.com/react-native-community/discussions-and-proposals/discussions/827
-   */
-  const safePadding = '5%';
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+      transform: [{translateY: translateY.value}],
+    };
+  });
 
   return (
-    <View style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        style={backgroundStyle}>
-        <View style={{paddingRight: safePadding}}>
-          <Header/>
-        </View>
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            paddingHorizontal: safePadding,
-            paddingBottom: safePadding,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+    <Animated.View style={animatedStyle}>
+      <Text style={{fontSize: 24, marginBottom: 20, color: 'red'}}>{text}</Text>
+    </Animated.View>
+  );
+};
+
+// Screen 1: Home Screen
+const HomeScreen = ({isNavigationReady = false}: any) => {
+  const {verifyBiometric} = useBiometricLogic();
+  useEffect(() => {
+    verifyBiometric(
+      () => {
+        console.log('onSuccess');
+      },
+      () => {
+        console.log('onFailure');
+      },
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    // console.log('HomeScreen');
+    // const timer = setTimeout(() => {
+    if (isNavigationReady) {
+      console.log('navigate to Profile');
+      NavigationService.navigate('Profile');
+    }
+    // }, 10000);
+    // return () => clearTimeout(timer);
+  }, [isNavigationReady]);
+
+  console.log('verifyBiometric');
+  return (
+    <ScrollView>
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <TouchableOpacity
+          onPress={() => NavigationService.navigate('Profile')}
+          style={{padding: 10, backgroundColor: '#007AFF', borderRadius: 5}}>
+          <Text style={{color: 'white'}}>Go to Profile</Text>
+        </TouchableOpacity>
+        <AnimatedText text="Home Screen" index={0} />
+      </View>
+    </ScrollView>
+  );
+};
+
+// Screen 2: Profile Screen
+const ProfileScreen = (props: any) => {
+  return (
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <Text style={{fontSize: 24, marginBottom: 20}}>Profile Screen</Text>
+      <TouchableOpacity
+        onPress={() => props.navigation.navigate('TabNavigator')}
+        style={{padding: 10, backgroundColor: '#007AFF', borderRadius: 5}}>
+        <Text style={{color: 'white'}}>Open Bottom Tabs</Text>
+      </TouchableOpacity>
     </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+// Screen 3: Settings (Bottom Tab)
+const SettingsScreen = () => {
+  return (
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <Text style={{fontSize: 24}}>Settings Screen</Text>
+      <Text style={{marginTop: 10, color: '#666'}}>Bottom Tab 1</Text>
+    </View>
+  );
+};
+
+// Screen 4: Notifications (Bottom Tab)
+const NotificationsScreen = () => {
+  return (
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <Text style={{fontSize: 24}}>Notifications Screen</Text>
+      <Text style={{marginTop: 10, color: '#666'}}>Bottom Tab 2</Text>
+    </View>
+  );
+};
+
+// Bottom Tab Navigator
+const TabNavigator = () => (
+  <Tab.Navigator id={undefined}>
+    <Tab.Screen
+      name="Settings"
+      component={SettingsScreen}
+      options={{tabBarLabel: 'Settings'}}
+    />
+    <Tab.Screen
+      name="Notifications"
+      component={NotificationsScreen}
+      options={{tabBarLabel: 'Notifications'}}
+    />
+  </Tab.Navigator>
+);
+
+// Main App Navigator
+const AppNavigator = () => {
+  const [isNavigationReady, setIsNavigationReady] = useState(false);
+  return (
+    <NavigationContainer
+      ref={ref => {
+        NavigationService.setTopLevelNavigator(ref);
+      }}
+      onReady={() => setIsNavigationReady(true)}>
+      <Stack.Navigator initialRouteName="Home" id={undefined}>
+        <Stack.Screen
+          name="Home"
+          // component={HomeScreen}
+          options={{title: 'Home'}}>
+          {(props: any) => (
+            <HomeScreen {...props} isNavigationReady={isNavigationReady} />
+          )}
+        </Stack.Screen>
+        <Stack.Screen
+          name="Profile"
+          component={ProfileScreen}
+          options={{title: 'Profile'}}
+        />
+        <Stack.Screen
+          name="TabNavigator"
+          component={TabNavigator}
+          options={{title: 'Bottom Tabs', headerShown: false}}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
+const App = () => {
+  return (
+    <GestureHandlerRootView style={{flex: 1}}>
+      <SafeAreaProvider>
+        <NotifierWrapper>
+          {/* <KeyboardProvider> */}
+          <AppNavigator />
+          {/* </KeyboardProvider> */}
+        </NotifierWrapper>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+  );
+};
 
 export default App;
