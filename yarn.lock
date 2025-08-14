@@ -1633,13 +1633,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@callstack/react-native-brownfield@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@callstack/react-native-brownfield@npm:1.1.0"
+"@callstack/react-native-brownfield@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "@callstack/react-native-brownfield@npm:1.2.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 2f6ccd87b83a242a9eaa4e7579dd37f2c68ccc1830e70ec60c7f3dae1929ce802ed78f44cbd96e450aa7cdc05879fea56536950f9e25175502e7219282f7c57a
+  checksum: 1be43c2ec396ac292986c4eeca275e38768712495a16291cd8af95ad7b635caef05e844478ad7dd6aeb72c3d83bb8d3d0ce1a4e40e4f78c810a568c33e295821
   languageName: node
   linkType: hard
 
@@ -3994,17 +3994,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shopify/flash-list@npm:^1.7.3":
-  version: 1.8.3
-  resolution: "@shopify/flash-list@npm:1.8.3"
+"@shopify/flash-list@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "@shopify/flash-list@npm:2.0.2"
   dependencies:
-    recyclerlistview: 4.2.3
     tslib: 2.8.1
   peerDependencies:
     "@babel/runtime": "*"
     react: "*"
     react-native: "*"
-  checksum: c055e2d2be3045aa3f862345159bc102696bdaf07f275217347ab77ece75cc8bb892d9fe338e2eb1cfe83212b2b719442503fffc6dcfb8c25da8e9044d5f1853
+  checksum: cfb3a6528eb123632218b68ecea881a2866d56183427a91a5454e57cd053ef28a4d40c8a6c9fc2d36ad3d1af997eaad0e4fcd632de538c3b335065cf4f3dd8dc
   languageName: node
   linkType: hard
 
@@ -9021,7 +9020,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"invariant@npm:^2.2.4":
+"invariant@npm:2.2.4, invariant@npm:^2.2.4":
   version: 2.2.4
   resolution: "invariant@npm:2.2.4"
   dependencies:
@@ -13018,6 +13017,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-webview@npm:^13.15.0":
+  version: 13.15.0
+  resolution: "react-native-webview@npm:13.15.0"
+  dependencies:
+    escape-string-regexp: ^4.0.0
+    invariant: 2.2.4
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 1c843206108358faef5cd8e25834de729a90319c3fa3f765923536fdd99b86b07a3e850b89ebe6503725a022dd9dddd5de76ef6e102d290cc5935dcf9c60198d
+  languageName: node
+  linkType: hard
+
 "react-native@npm:0.77.2":
   version: 0.77.2
   resolution: "react-native@npm:0.77.2"
@@ -13247,7 +13259,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recyclerlistview@npm:4.2.3, recyclerlistview@npm:^4.0.0":
+"recyclerlistview@npm:^4.0.0":
   version: 4.2.3
   resolution: "recyclerlistview@npm:4.2.3"
   dependencies:
@@ -13656,7 +13668,7 @@ __metadata:
     "@babel/core": ^7.25.2
     "@babel/preset-env": ^7.25.3
     "@babel/runtime": ^7.25.0
-    "@callstack/react-native-brownfield": ^1.1.0
+    "@callstack/react-native-brownfield": ^1.2.0
     "@commitlint/config-conventional": ^17.0.2
     "@evilmartians/lefthook": ^1.5.0
     "@gorhom/bottom-sheet": ^5.1.2
@@ -13679,7 +13691,7 @@ __metadata:
     "@react-navigation/stack": ^7.2.10
     "@reduxjs/toolkit": ^2.2.7
     "@release-it/conventional-changelog": ^5.0.0
-    "@shopify/flash-list": ^1.7.3
+    "@shopify/flash-list": ^2.0.2
     "@testing-library/react-native": ^13.2.0
     "@types/d3-shape": ^3.1.6
     "@types/jest": ^29.5.13
@@ -13730,6 +13742,7 @@ __metadata:
     react-native-shake: 6.7.7
     react-native-swipe-list-view: ^3.2.9
     react-native-url-polyfill: ^2.0.0
+    react-native-webview: ^13.15.0
     react-redux: ^9.1.2
     react-test-renderer: 19.0.0
     redux-logger: ^3.0.6

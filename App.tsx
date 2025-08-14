@@ -21,6 +21,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import useBiometricLogic from './useBiometricLogic';
 import NavigationService from './NavigationService';
+import ReactNativeBrownfield from '@callstack/react-native-brownfield';
+import FontTestComponent from './components/FontTestComponent';
 // import {KeyboardProvider} from 'react-native-keyboard-controller';
 
 const Stack = createNativeStackNavigator();
@@ -51,8 +53,32 @@ const AnimatedText = ({text, index}: {text: string; index: number}) => {
 };
 
 // Screen 1: Home Screen
-const HomeScreen = ({_isNavigationReady = false}: any) => {
+const HomeScreen = (props: any) => {
   const {verifyBiometric} = useBiometricLogic();
+
+  // Log the parameters received from native Android
+  useEffect(() => {
+    console.log('🚀 React Native Component Props:', props);
+    console.log('📱 Parameters from Native Android:');
+    console.log('  - userId:', props.userId);
+    console.log('  - userName:', props.userName);
+    console.log('  - isPremium:', props.isPremium);
+    console.log('  - theme:', props.theme);
+    console.log('  - userRole:', props.userRole);
+    console.log('  - timestamp:', props.timestamp);
+    console.log('  - deviceModel:', props.deviceModel);
+    console.log('  - androidVersion:', props.androidVersion);
+    console.log('  - All props:', JSON.stringify(props, null, 2));
+  }, [props]);
+
+  useEffect(() => {
+    const unsubscribe = props.navigation.addListener('focus', () => {
+      const isFirstRoute = !props.navigation.canGoBack();
+      ReactNativeBrownfield.setNativeBackGestureAndButtonEnabled(isFirstRoute);
+    });
+    return unsubscribe;
+  }, [props.navigation]);
+
   useEffect(() => {
     verifyBiometric(
       () => {
@@ -69,25 +95,30 @@ const HomeScreen = ({_isNavigationReady = false}: any) => {
     try {
       // Request Android notification permission first
       if (Platform.OS === 'android') {
-        try {
-          const granted = await PermissionsAndroid.request(
-            'android.permission.POST_NOTIFICATIONS',
-            {
-              title: 'Notification Permission',
-              message:
-                'App needs access to your notifications so you can get updates',
-              buttonNeutral: 'Ask Me Later',
-              buttonNegative: 'Cancel',
-              buttonPositive: 'OK',
-            },
-          );
-          if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+        let enabled = await PermissionsAndroid.check(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        );
+        console.log('enabled notification permission', enabled);
+        if (!enabled) {
+          try {
+            const granted = await PermissionsAndroid.request(
+              'android.permission.POST_NOTIFICATIONS',
+              {
+                title: 'Notification Permission',
+                message:
+                  'App needs access to your notifications so you can get updates',
+                buttonNeutral: 'Ask Me Later',
+                buttonNegative: 'Cancel',
+                buttonPositive: 'OK',
+              },
+            );
+            if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+            }
+          } catch (err) {
+            console.log('Notification permission error:', err);
           }
-        } catch (err) {
-          console.log('Notification permission error:', err);
         }
       }
-
       // DeviceTokenHandler.requestMessagingPermissionAndUpdateToken(dispatch);
     } catch (error) {
       console.log('General permission error:', error);
@@ -96,22 +127,28 @@ const HomeScreen = ({_isNavigationReady = false}: any) => {
 
   const requestLocationPermission = async () => {
     if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Permission',
-            message:
-              'This app needs access to your location to provide better services.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          },
-        );
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
-        console.log('Location permission error:', err);
-        return false;
+      let enabled = await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      );
+      console.log('enabled location permission', enabled);
+      if (!enabled) {
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            {
+              title: 'Location Permission',
+              message:
+                'This app needs access to your location to provide better services.',
+              buttonNeutral: 'Ask Me Later',
+              buttonNegative: 'Cancel',
+              buttonPositive: 'OK',
+            },
+          );
+          return granted === PermissionsAndroid.RESULTS.GRANTED;
+        } catch (err) {
+          console.log('Location permission error:', err);
+          return false;
+        }
       }
     }
     return true; // iOS handles location permission differently
@@ -132,6 +169,27 @@ const HomeScreen = ({_isNavigationReady = false}: any) => {
     <ScrollView>
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <AnimatedText text="Home Screen" index={0} />
+        
+        {/* Display Native Android Parameters */}
+        <View style={{width: '90%', marginTop: 20, padding: 15, backgroundColor: '#f0f0f0', borderRadius: 8}}>
+          <Text style={{fontSize: 18, fontWeight: 'bold', marginBottom: 10, textAlign: 'center'}}>
+            📱 Parameters from Native Android
+          </Text>
+          <Text style={{fontSize: 14, marginBottom: 5}}>User ID: {props.userId || 'Not received'}</Text>
+          <Text style={{fontSize: 14, marginBottom: 5}}>User Name: {props.userName || 'Not received'}</Text>
+          <Text style={{fontSize: 14, marginBottom: 5}}>Premium: {props.isPremium ? 'Yes' : 'No'}</Text>
+          <Text style={{fontSize: 14, marginBottom: 5}}>Theme: {props.theme || 'Not received'}</Text>
+          <Text style={{fontSize: 14, marginBottom: 5}}>Role: {props.userRole || 'Not received'}</Text>
+          <Text style={{fontSize: 14, marginBottom: 5}}>Device: {props.deviceModel || 'Not received'}</Text>
+          <Text style={{fontSize: 14, marginBottom: 5}}>Android: {props.androidVersion || 'Not received'}</Text>
+          <Text style={{fontSize: 14, marginBottom: 5}}>Timestamp: {props.timestamp || 'Not received'}</Text>
+        </View>
+        
+        {/* Font Test Component */}
+        <View style={{width: '100%', marginTop: 20}}>
+          <FontTestComponent />
+        </View>
+        
         <TouchableOpacity
           onPress={() => NavigationService.navigate('Profile')}
           style={{padding: 10, backgroundColor: '#007AFF', borderRadius: 5}}>
@@ -140,7 +198,7 @@ const HomeScreen = ({_isNavigationReady = false}: any) => {
 
         <TouchableOpacity
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backgroundColor: '#ccc',
             padding: 10,
             borderRadius: 5,
             marginTop: 20,
@@ -152,7 +210,7 @@ const HomeScreen = ({_isNavigationReady = false}: any) => {
         </TouchableOpacity>
         <TouchableOpacity
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backgroundColor: '#ccc',
             padding: 10,
             borderRadius: 5,
             marginTop: 20,
@@ -164,7 +222,7 @@ const HomeScreen = ({_isNavigationReady = false}: any) => {
         </TouchableOpacity>
         <TouchableOpacity
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backgroundColor: '#ccc',
             padding: 10,
             borderRadius: 5,
             marginTop: 20,
